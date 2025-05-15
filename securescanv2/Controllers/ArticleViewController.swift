@@ -1,0 +1,150 @@
+import UIKit
+@preconcurrency import WebKit
+
+class ArticleViewController: UIViewController {
+    
+    // UI Components
+    private let webView = WKWebView()
+    private let activityIndicator = UIActivityIndicatorView()
+    
+    // Data
+    private let content: EducationalContent
+    
+    init(content: EducationalContent) {
+        self.content = content
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupUI()
+        setupConstraints()
+        loadArticle()
+    }
+    
+    private func setupUI() {
+        view.backgroundColor = .systemBackground
+        title = content.title
+        
+        // Configure webview
+        webView.navigationDelegate = self
+        webView.backgroundColor = .systemBackground
+        view.addSubview(webView)
+        
+        // Activity indicator
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.style = .large
+        view.addSubview(activityIndicator)
+    }
+    
+    private func setupConstraints() {
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+    }
+    
+    private func loadArticle() {
+        activityIndicator.startAnimating()
+        
+        // Prepare HTML with proper styling
+        let htmlString = """
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+            <style>
+                body {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                    margin: 15px;
+                    font-size: 16px;
+                    color: #333;
+                    line-height: 1.6;
+                }
+                h1, h2, h3 {
+                    color: #1E88E5;
+                }
+                img {
+                    max-width: 100%;
+                    height: auto;
+                    border-radius: 8px;
+                }
+                ul, ol {
+                    padding-left: 20px;
+                }
+                li {
+                    margin-bottom: 10px;
+                }
+                a {
+                    color: #1E88E5;
+                    text-decoration: none;
+                }
+                .container {
+                    max-width: 800px;
+                    margin: 0 auto;
+                }
+                @media (prefers-color-scheme: dark) {
+                    body { background-color: #121212; color: #e0e0e0; }
+                    h1, h2, h3 { color: #64B5F6; }
+                    a { color: #64B5F6; }
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>\(content.title)</h1>
+                \(content.content)
+            </div>
+        </body>
+        </html>
+        """
+        
+        webView.loadHTMLString(htmlString, baseURL: nil)
+    }
+    
+    // Mark as completed when viewed
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        EducationService.shared.markAsCompleted(contentId: content.id)
+    }
+}
+
+// MARK: - WKNavigationDelegate
+extension ArticleViewController: WKNavigationDelegate {
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        activityIndicator.stopAnimating()
+    }
+    
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        activityIndicator.stopAnimating()
+        // Show error message
+        let alert = UIAlertController(title: "Błąd", message: "Nie można załadować artykułu: \(error.localizedDescription)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    // Handle link clicks within article
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        // If it's a link to an external website
+        if navigationAction.navigationType == .linkActivated, let url = navigationAction.request.url, url.host != nil {
+            // Open in Safari
+            UIApplication.shared.open(url)
+            decisionHandler(.cancel)
+            return
+        }
+        
+        decisionHandler(.allow)
+    }
+}
