@@ -1,0 +1,96 @@
+import Foundation
+import UserNotifications
+
+class NotificationManager {
+    
+    static let shared = NotificationManager()
+    
+    private init() {}
+    
+    // Request notification permissions
+    func requestPermissions(completion: @escaping (Bool) -> Void) {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if let error = error {
+                print("Error requesting notification permissions: \(error.localizedDescription)")
+            }
+            completion(granted)
+        }
+    }
+    
+    // Schedule a security tip notification
+    func scheduleSecurityTip() {
+        let tips = [
+            "Zawsze weryfikuj nadawcę wiadomości email przed kliknięciem w linki",
+            "Nie otwieraj załączników od nieznanych nadawców",
+            "Używaj różnych haseł dla różnych kont",
+            "Regularnie aktualizuj swoje urządzenia i aplikacje",
+            "Włącz uwierzytelnianie dwuskładnikowe dla swoich kont",
+            "Nie udostępniaj swoich danych osobowych na niezaufanych stronach",
+            "Uważaj na podejrzane linki w wiadomościach SMS",
+            "Sprawdzaj, czy strona ma szyfrowanie HTTPS przed podaniem danych",
+            "Bądź ostrożny wobec ofert, które wydają się zbyt dobre, aby były prawdziwe",
+            "Regularnie twórz kopie zapasowe swoich danych"
+        ]
+        
+        // Create notification content
+        let content = UNMutableNotificationContent()
+        content.title = "Wskazówka bezpieczeństwa"
+        content.body = tips.randomElement() ?? tips[0]
+        content.sound = .default
+        content.badge = 1
+        
+        // Create trigger (daily at 10 AM)
+        var dateComponents = DateComponents()
+        dateComponents.hour = 10
+        dateComponents.minute = 0
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
+        
+        // Create request
+        let request = UNNotificationRequest(
+            identifier: "securityTip",
+            content: content,
+            trigger: trigger
+        )
+        
+        // Add request to notification center
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling notification: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // Schedule a notification about a new threat
+    func notifyAboutNewThreat(title: String, description: String) {
+        // Create notification content
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = description
+        content.sound = .default
+        content.badge = 1
+        
+        // Create trigger (immediately)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        
+        // Create request with unique ID
+        let request = UNNotificationRequest(
+            identifier: "threat-\(UUID().uuidString)",
+            content: content,
+            trigger: trigger
+        )
+        
+        // Add request to notification center
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling notification: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // Clear all notifications
+    func clearNotifications() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+    }
+}

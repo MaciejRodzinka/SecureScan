@@ -7,7 +7,7 @@ class URLScannerService {
     
     private init() {}
     
-    // Database of known phishing domains (would be updated regularly in production)
+    
     private let knownPhishingDomains = [
         "fake-bank.com",
         "login-secure-verify.com",
@@ -15,14 +15,14 @@ class URLScannerService {
         "secure-payment-confirm.com"
     ]
     
-    // Suspicious keywords in URLs
+    
     private let suspiciousKeywords = [
         "login", "verify", "secure", "account", "password", "bank", 
         "update", "alert", "confirm", "pay", "weryfikacja", "konto", 
         "haslo", "bank", "platnosc"
     ]
     
-    // Keywords for content categories (for demonstration purposes)
+    
     private let contentCategoryKeywords: [ContentCategory: [String]] = [
         .adult: [
             "porn", "sex", "xxx", "adult", "nude", "naked", "pornografia", "erotyka",
@@ -62,9 +62,9 @@ class URLScannerService {
         ]
     ]
     
-    // Mock scan result - in a real app, this would use ML models and API calls to security services
+    
     func scanURL(_ urlString: String, sourceType: SourceType = .manual, completion: @escaping (ScanResult) -> Void) {
-        // Validate URL format
+        
         guard let url = URL(string: urlString), let host = url.host?.lowercased() else {
             let result = ScanResult(
                 url: urlString,
@@ -80,16 +80,16 @@ class URLScannerService {
             return
         }
         
-        // Detect content category based on keywords
+        
         var detectedCategory: ContentCategory = .none
         var categoryDetails = ""
         var resultType: ScanResultType = .safe
         var educationalMessage = ""
         
-        // Check in both domain and path for category keywords
+        
         let fullURL = urlString.lowercased()
         
-        // Function to check URL against category keywords
+        
         func checkCategory(category: ContentCategory) -> Bool {
             guard let keywords = contentCategoryKeywords[category] else { return false }
             return keywords.contains { keyword in 
@@ -97,7 +97,7 @@ class URLScannerService {
             }
         }
         
-        // Check for content categories (in priority order)
+        
         if checkCategory(category: .phishing) {
             detectedCategory = .phishing
             resultType = .dangerous
@@ -153,7 +153,7 @@ class URLScannerService {
             educationalMessage = "Strony z treściami ekstremistycznymi mogą zawierać nielegalne, szkodliwe materiały propagujące nienawiść"
         }
         
-        // Check for known phishing domains regardless of content category
+        
         if knownPhishingDomains.contains(where: { host.contains($0) }) {
             detectedCategory = .phishing
             resultType = .dangerous
@@ -161,35 +161,35 @@ class URLScannerService {
             educationalMessage = "Nigdy nie podawaj swoich danych osobowych na podejrzanych stronach"
         }
         
-        // Check for suspicious characteristics if no category detected
+        
         var suspiciousCount = 0
         
-        // Check for HTTPS
+        
         if !urlString.starts(with: "https://") {
             suspiciousCount += 1
         }
         
-        // Check for suspicious keywords
+        
         for keyword in suspiciousKeywords {
             if host.contains(keyword) {
                 suspiciousCount += 1
             }
         }
         
-        // Check for unusual number of subdomains
+        
         let subdomainCount = host.components(separatedBy: ".").count
         if subdomainCount > 3 {
             suspiciousCount += 1
         }
         
-        // If no specific category was detected but URL is suspicious
+        
         if detectedCategory == .none && suspiciousCount >= 3 {
             resultType = .suspicious
             categoryDetails = "Ten URL zawiera podejrzane elementy"
             educationalMessage = "Bądź ostrożny wobec adresów URL z wieloma domenami lub podejrzanymi słowami kluczowymi"
         }
         
-        // If no issues found and no category detected
+        
         if detectedCategory == .none && resultType == .safe {
             categoryDetails = "Ten URL wydaje się być bezpieczny"
             educationalMessage = "Nawet jeśli URL wydaje się bezpieczny, zawsze zachowuj ostrożność przy podawaniu danych osobowych"
@@ -209,9 +209,9 @@ class URLScannerService {
         completion(result)
     }
     
-    // Function to scan multiple URLs (e.g., from a text message)
+    
     func extractAndScanURLs(from text: String, completion: @escaping ([ScanResult]) -> Void) {
-        // Simple URL regex pattern
+        
         let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
         let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
         
@@ -239,8 +239,8 @@ class URLScannerService {
         }
     }
     
-    // Test function to simulate scanning a URL with a specific content category
-    // This is for demonstration and testing purposes
+    
+    
     func simulateCategoryDetection(url: String, category: ContentCategory, sourceType: SourceType = .manual, completion: @escaping (ScanResult) -> Void) {
         var resultType: ScanResultType = .suspicious
         var details = ""
@@ -298,8 +298,8 @@ class URLScannerService {
         completion(result)
     }
     
-    // Store scan history
-    // Zamiast przechowywać obiekty [ScanResult], przechowujemy informacje potrzebne do ich utworzenia
+    
+    
     private struct HistoryItem {
         let url: String
         let resultType: ScanResultType
@@ -313,7 +313,7 @@ class URLScannerService {
     private var scanHistory: [HistoryItem] = []
     
     func addToHistory(_ result: ScanResult) {
-        // Konwertujemy ScanResult na HistoryItem
+        
         let historyItem = HistoryItem(
             url: result.url,
             resultType: result.resultType,
@@ -324,11 +324,11 @@ class URLScannerService {
             educationalTip: result.educationalTip
         )
         scanHistory.append(historyItem)
-        // In a real app, this would be persisted using Core Data or similar
+        
     }
     
     func getScanHistory() -> [ScanResult] {
-        // Konwertujemy HistoryItem na ScanResult z dodaniem sourceType
+        
         return scanHistory.sorted(by: { $0.scanDate > $1.scanDate }).map { item in
             return ScanResult(
                 url: item.url,
@@ -337,7 +337,7 @@ class URLScannerService {
                 details: item.details,
                 isPhishing: item.isPhishing,
                 contentCategory: item.contentCategory,
-                sourceType: .manual, // Zakładamy, że stare wpisy są manualne
+                sourceType: .manual, 
                 educationalTip: item.educationalTip
             )
         }
@@ -345,6 +345,5 @@ class URLScannerService {
     
     func clearHistory() {
         scanHistory.removeAll()
-        // In a real app, this would clear the persistent storage
     }
 }

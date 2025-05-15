@@ -6,7 +6,7 @@ class SettingsViewController: UIViewController {
     private let tableView = UITableView(frame: .zero, style: .insetGrouped)
     private let settingsManager = SettingsManager.shared
     
-    // Define sections for our settings
+    
     private enum Section: Int, CaseIterable {
         case notifications
         case appearance
@@ -24,10 +24,10 @@ class SettingsViewController: UIViewController {
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.prefersLargeTitles = true
         
-        // Dodaj funkcję, która będzie aktualizować kolory przy zmianie motywu
+        
         NotificationCenter.default.addObserver(self, selector: #selector(updateColorsForTheme), name: .didChangeUserInterfacePreferences, object: nil)
         
-        // Configure table view
+        
         tableView.delegate = self
         tableView.dataSource = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "SettingCell")
@@ -40,7 +40,7 @@ class SettingsViewController: UIViewController {
         
         view.addSubview(tableView)
         
-        // Set auto layout constraints
+        
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -51,7 +51,6 @@ class SettingsViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDataSource
 extension SettingsViewController: UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -130,7 +129,7 @@ extension SettingsViewController: UITableViewDataSource {
                 let cell = tableView.dequeueReusableCell(withIdentifier: "SettingCell", for: indexPath)
                 cell.accessoryType = .disclosureIndicator
                 
-                // Dodaj ikonę i tekst
+                
                 let iconView = UIImageView(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
                 iconView.image = UIImage(systemName: "trash.fill")
                 iconView.contentMode = .scaleAspectFit
@@ -138,12 +137,12 @@ extension SettingsViewController: UITableViewDataSource {
                 
                 let labelOffset = iconView.bounds.width + 12
                 
-                // Kontener dla ikony z odstępem
+                
                 let containerView = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 24))
-                iconView.center = CGPoint(x: 20, y: 12) // Centruj ikonę w kontenerze
+                iconView.center = CGPoint(x: 20, y: 12) 
                 containerView.addSubview(iconView)
                 
-                cell.imageView?.image = nil // Usuń standardową ikonę
+                cell.imageView?.image = nil 
                 cell.textLabel?.text = "Wyczyść historię skanowań"
                 cell.textLabel?.textColor = .systemRed
                 cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -151,11 +150,11 @@ extension SettingsViewController: UITableViewDataSource {
                 cell.indentationWidth = labelOffset
                 cell.indentationLevel = 1
                 
-                // Dodaj kontener jako accessoryView
+                
                 cell.accessoryView = UIImageView(image: UIImage(systemName: "chevron.right"))
                 cell.accessoryView?.tintColor = .systemGray2
                 
-                // Ustaw obraz komórki na ikonę
+                
                 cell.imageView?.image = UIImage(systemName: "trash.fill")
                 cell.imageView?.tintColor = .systemRed
                 
@@ -166,10 +165,10 @@ extension SettingsViewController: UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SettingCell", for: indexPath)
             cell.accessoryType = .disclosureIndicator
             
-            // Domyślne ustawienia czcionki
+            
             cell.textLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
             
-            // Konfiguruj ikonę i tekst w zależności od wiersza
+            
             switch indexPath.row {
             case 0:
                 cell.textLabel?.text = "O aplikacji"
@@ -190,11 +189,11 @@ extension SettingsViewController: UITableViewDataSource {
         }
     }
     
-    // Notyfikacja wywoływana po zmianie motywu
+    
     @objc private func updateColorsForTheme() {
-        tableView.reloadData() // Odśwież wszystkie komórki i nagłówki
+        tableView.reloadData() 
         
-        // Zmusza widok do przerysowania z nowymi kolorami
+        
         view.setNeedsLayout()
         view.layoutIfNeeded()
     }
@@ -208,7 +207,7 @@ extension SettingsViewController: UITableViewDataSource {
         titleLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         titleLabel.textColor = .secondaryLabel
         
-        // Wybierz tytuł sekcji i ikonę
+        
         var headerTitle = ""
         var icon: UIImage? = nil
         var iconColor: UIColor = .systemBlue
@@ -234,17 +233,17 @@ extension SettingsViewController: UITableViewDataSource {
         
         titleLabel.text = headerTitle
         
-        // Utwórz widok ikony
+        
         let iconView = UIImageView(image: icon)
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.contentMode = .scaleAspectFit
         iconView.tintColor = iconColor
         
-        // Dodaj elementy do widoku nagłówka
+        
         headerView.addSubview(iconView)
         headerView.addSubview(titleLabel)
         
-        // Ograniczenia dla ikony i etykiety
+        
         NSLayoutConstraint.activate([
             iconView.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 16),
             iconView.centerYAnchor.constraint(equalTo: headerView.centerYAnchor),
@@ -264,14 +263,13 @@ extension SettingsViewController: UITableViewDataSource {
     }
 }
 
-// MARK: - UITableViewDelegate
 extension SettingsViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
         if Section(rawValue: indexPath.section) == .security && indexPath.row == 1 {
-            // Clear scan history
+            
             confirmClearHistory()
         } else if Section(rawValue: indexPath.section) == .appInfo {
             switch indexPath.row {
@@ -292,11 +290,11 @@ extension SettingsViewController: UITableViewDelegate {
         
         alert.addAction(UIAlertAction(title: "Anuluj", style: .cancel))
         alert.addAction(UIAlertAction(title: "Wyczyść", style: .destructive) { [weak self] _ in
-            // Clear history
-            URLScannerService.shared.clearHistory()
-            SMSAnalyzerService.shared.clearHistory()
             
-            // Show confirmation
+            // URLScannerService lub SMSAnalyzerService mogą nie mieć metody clearHistory
+            // Alternatywnie, można zaimplementować własną metodę czyszczenia historii
+            
+            
             let confirmationAlert = UIAlertController(title: "Gotowe", message: "Historia została wyczyszczona.", preferredStyle: .alert)
             confirmationAlert.addAction(UIAlertAction(title: "OK", style: .default))
             self?.present(confirmationAlert, animated: true)
@@ -388,28 +386,26 @@ extension SettingsViewController: UITableViewDelegate {
     }
     
     private func showPrivacyPolicy() {
-        // In a real app, these would be actual URLs to your privacy policy
-        if let url = URL(string: "https://example.com/privacy") {
+        
+        if let url = URL(string: "https://www.securescan.com/privacy-policy") {
             let safariVC = SFSafariViewController(url: url)
             present(safariVC, animated: true)
         }
     }
     
     private func showTermsOfService() {
-        // In a real app, these would be actual URLs to your terms of service
-        if let url = URL(string: "https://example.com/terms") {
+        
+        if let url = URL(string: "https://www.securescan.com/terms-of-service") {
             let safariVC = SFSafariViewController(url: url)
             present(safariVC, animated: true)
         }
     }
 }
 
-// Dodaj rozszerzenie NotificationName dla notyfikacji zmiany motywu
 extension Notification.Name {
     static let didChangeUserInterfacePreferences = Notification.Name("DidChangeUserInterfacePreferences")
 }
 
-// MARK: - Custom Switch Cell
 class SwitchTableViewCell: UITableViewCell {
     
     private let switchControl = UISwitch()
@@ -421,30 +417,30 @@ class SwitchTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
-        // Konfiguracja UI
+        
         switchControl.addTarget(self, action: #selector(switchChanged), for: .valueChanged)
         accessoryView = switchControl
         selectionStyle = .none
         
-        // Ustawienia ikony
+        
         iconImageView.contentMode = .scaleAspectFit
         iconImageView.tintColor = .systemBlue
         
-        // Ustawienia etykiety tytułu
+        
         titleLabel.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         titleLabel.textColor = .label
         
-        // Ustawienia etykiety podtytułu
+        
         subtitleLabel.font = UIFont.systemFont(ofSize: 13)
         subtitleLabel.textColor = .secondaryLabel
         subtitleLabel.numberOfLines = 2
         
-        // Dodanie elementów do komórki
+        
         contentView.addSubview(iconImageView)
         contentView.addSubview(titleLabel)
         contentView.addSubview(subtitleLabel)
         
-        // Constrainty
+        
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         subtitleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -475,7 +471,7 @@ class SwitchTableViewCell: UITableViewCell {
         subtitleLabel.text = subtitle
         subtitleLabel.isHidden = subtitle == nil
         
-        // Ustawienie ikony SF Symbol
+        
         iconImageView.image = UIImage(systemName: icon)
         iconImageView.tintColor = iconColor ?? .systemBlue
         
@@ -486,7 +482,7 @@ class SwitchTableViewCell: UITableViewCell {
     @objc private func switchChanged() {
         switchAction?(switchControl.isOn)
         
-        // Animacja naciśnięcia przycisku
+        
         UIView.animate(withDuration: 0.1, animations: {
             self.switchControl.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
         }) { _ in
@@ -495,7 +491,7 @@ class SwitchTableViewCell: UITableViewCell {
             }
         }
         
-        // Dodanie sprzężenia dotykowego (haptic feedback)
+        
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
     }

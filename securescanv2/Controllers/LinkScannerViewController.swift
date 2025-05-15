@@ -2,7 +2,7 @@ import UIKit
 
 class LinkScannerViewController: UIViewController {
     
-    // UI Components
+    
     private let titleLabel = UILabel()
     private let descriptionLabel = UILabel()
     private let urlTextField = UITextField()
@@ -11,7 +11,7 @@ class LinkScannerViewController: UIViewController {
     private let instructionsLabel = UILabel()
     private let examplePhishingView = UIView()
     
-    // Scanner Service
+    
     private let scannerService = URLScannerService.shared
     
     override func viewDidLoad() {
@@ -24,14 +24,14 @@ class LinkScannerViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Skanowanie Linku"
         
-        // Title
+        
         titleLabel.text = "Sprawdź bezpieczeństwo linku"
         titleLabel.font = UIFont.systemFont(ofSize: 22, weight: .bold)
         titleLabel.textAlignment = .center
         titleLabel.numberOfLines = 0
         view.addSubview(titleLabel)
         
-        // Description
+        
         descriptionLabel.text = "Wklej adres URL, aby sprawdzić, czy jest to próba phishingu lub złośliwa strona"
         descriptionLabel.font = UIFont.systemFont(ofSize: 16)
         descriptionLabel.textColor = .secondaryLabel
@@ -39,7 +39,7 @@ class LinkScannerViewController: UIViewController {
         descriptionLabel.numberOfLines = 0
         view.addSubview(descriptionLabel)
         
-        // URL TextField
+        
         urlTextField.placeholder = "https://example.com"
         urlTextField.borderStyle = .roundedRect
         urlTextField.returnKeyType = .go
@@ -49,7 +49,7 @@ class LinkScannerViewController: UIViewController {
         urlTextField.delegate = self
         view.addSubview(urlTextField)
         
-        // Scan Button
+        
         scanButton.setTitle("Skanuj Link", for: .normal)
         scanButton.backgroundColor = .systemBlue
         scanButton.layer.cornerRadius = 12
@@ -57,19 +57,19 @@ class LinkScannerViewController: UIViewController {
         scanButton.addTarget(self, action: #selector(scanButtonTapped), for: .touchUpInside)
         view.addSubview(scanButton)
         
-        // Activity Indicator
+        
         activityIndicator.hidesWhenStopped = true
         activityIndicator.style = .large
         view.addSubview(activityIndicator)
         
-        // Instructions
+        
         instructionsLabel.text = "Pamiętaj:\n• Sprawdź, czy adres URL zawiera \"https\"\n• Zwróć uwagę na literówki w adresach znanych stron\n• Nie klikaj w linki od nieznanych nadawców"
         instructionsLabel.font = UIFont.systemFont(ofSize: 14)
         instructionsLabel.textColor = .secondaryLabel
         instructionsLabel.numberOfLines = 0
         view.addSubview(instructionsLabel)
         
-        // Example phishing view
+        
         setupExampleView()
     }
     
@@ -98,7 +98,7 @@ class LinkScannerViewController: UIViewController {
         warningIcon.contentMode = .scaleAspectFit
         examplePhishingView.addSubview(warningIcon)
         
-        // Layout
+        
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
         exampleLabel.translatesAutoresizingMaskIntoConstraints = false
         warningIcon.translatesAutoresizingMaskIntoConstraints = false
@@ -175,10 +175,10 @@ class LinkScannerViewController: UIViewController {
             DispatchQueue.main.async {
                 self.stopScanning()
                 
-                // Add to scan history
+                
                 self.scannerService.addToHistory(result)
                 
-                // Navigate to results
+                
                 let resultVC = ScanResultViewController(scanResult: result)
                 self.navigationController?.pushViewController(resultVC, animated: true)
             }
@@ -204,7 +204,6 @@ class LinkScannerViewController: UIViewController {
     }
 }
 
-// MARK: - UITextFieldDelegate
 extension LinkScannerViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == urlTextField {
